@@ -7,7 +7,10 @@ namespace {
 ListParser::ListParser(std::unique_ptr<ListLexer> lexer)
     : lexer_(std::move(lexer))
 {
-    consume();
+    lookaheads_.resize(K);
+    for (size_t i = 0; i < K; i++) {
+        consume();
+    }
 }
 
 void ListParser::parse()
@@ -25,7 +28,7 @@ void ListParser::list()
 void ListParser::elements()
 {
     element();
-    while (lookahead->getType() == ListLexer::TOKEN_COMMA) {
+    while (lookaheadToken(0)->getType() == ListLexer::TOKEN_COMMA) {
         match(ListLexer::TOKEN_COMMA);
         element();
     }
@@ -33,19 +36,26 @@ void ListParser::elements()
 
 void ListParser::element()
 {
-    if (lookahead->getType() == ListLexer::TOKEN_NAME) {
+    if (lookaheadToken(0)->getType() == ListLexer::TOKEN_NAME &&
+            lookaheadToken(1)->getType() == ListLexer::TOKEN_EQUALS) {
         match(ListLexer::TOKEN_NAME);
-    } else if (lookahead->getType() == ListLexer::TOKEN_LBRACK) {
+        match(ListLexer::TOKEN_EQUALS);
+        match(ListLexer::TOKEN_NAME);
+    } else if (lookaheadToken(0)->getType() == ListLexer::TOKEN_NAME) {
+        match(ListLexer::TOKEN_NAME);
+    } else if (lookaheadToken(0)->getType() == ListLexer::TOKEN_LBRACK) {
         list();
     } else {
-        throw std::string("expecting name or list; found " + lookahead->toString());
+        throw std::string("expecting name or list; found " +
+                          lookaheadToken(0)->toString());
     }
 }
 
 void ListParser::match(int tokenType)
 {
-    if (lookahead->getType() != tokenType) {
-        throw std::string("expecting " + ListLexer::tokeName(tokenType) + "; found " + ListLexer::tokeName(lookahead->getType()));
+    if (lookaheadToken(0)->getType() != tokenType) {
+        throw std::string("expecting " + ListLexer::tokeName(tokenType) +
+                          "; found " + ListLexer::tokeName(lookaheadToken(0)->getType()));
     }
 
     consume();
@@ -53,9 +63,15 @@ void ListParser::match(int tokenType)
 
 void ListParser::consume()
 {
-    if (!lookahead) {
-        lookahead.reset(new Token(lexer_->nextToken()));
+    if (!lookaheads_[p_]) {
+        lookaheads_[p_].reset(new Token(lexer_->nextToken()));
     } else {
-        *lookahead = lexer_->nextToken();
+        *lookaheads_[p_] = lexer_->nextToken();
     }
+    p_ = (p_ + 1) % K;
+}
+
+Token *ListParser::lookaheadToken(const int i) const
+{
+    return lookaheads_[(p_ + i) % K].get();
 }

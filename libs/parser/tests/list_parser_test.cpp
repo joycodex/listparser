@@ -20,5 +20,8 @@ TEST_F(ListParserTest, testParser) {
     parse("");
     parse("[]");
     parse("[a]");
+    parse("[a=]");
+    parse("[a=b]");
     parse("[a, b]");
+    parse("[a, b=c, d]");
 }
