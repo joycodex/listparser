@@ -7,12 +7,11 @@ namespace {
 ListParser::ListParser(std::unique_ptr<ListLexer> lexer)
     : lexer_(std::move(lexer))
 {
-
+    consume();
 }
 
 void ListParser::parse()
 {
-    consume();
     list();
 }
 
