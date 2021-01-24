@@ -5,7 +5,7 @@
 namespace {
 
 std::vector<std::string> tokenNames {
-    "n/a", "<EOF>", "NAME", "COMMA", "LBRACK", "RBRACK"
+    "n/a", "<EOF>", "NAME", "COMMA", "LBRACK", "RBRACK", "EQUALS"
 };
 
 bool isWhiteSpace(const char ch) {
@@ -64,6 +64,9 @@ Token ListLexer::nextToken()
         } else if (stream_->peak() == ']') {
             stream_->consume();
             return Token(TOKEN_RBRACK, tokeName(TOKEN_RBRACK), "]");
+        } else if (stream_->peak() == '=') {
+            stream_->consume();
+            return Token(TOKEN_EQUALS, tokeName(TOKEN_EQUALS), "=");
         } else if (isLetter(stream_->peak())) {
             return NAME(stream_.get());
         } else {

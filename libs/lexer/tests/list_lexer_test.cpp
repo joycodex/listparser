@@ -25,6 +25,7 @@ public:
 
 TEST_F(ListLexerTest, testLexer) {
     lexer("");
+    lexer("=");
     lexer("[a, b, [a, b]]");
     lexer("[a, b^");
 }

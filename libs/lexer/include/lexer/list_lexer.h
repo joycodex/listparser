@@ -15,6 +15,7 @@ public:
     constexpr static int TOKEN_COMMA = 3;
     constexpr static int TOKEN_LBRACK = 4;
     constexpr static int TOKEN_RBRACK = 5;
+    constexpr static int TOKEN_EQUALS = 6;
 
     static std::string tokeName(const int token);
 
